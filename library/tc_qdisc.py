@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 # Copyright: (c) 2020, Jaroslav Fedor <fedorjaro@gmail.com>
-# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+# GNU General Public License v3.0+ (see COPYING or
+# https://www.gnu.org/licenses/gpl-3.0.txt)
+
+from ansible.module_utils.basic import AnsibleModule
 
 ANSIBLE_METADATA = {
     'metadata_version': '0.1',
@@ -18,7 +21,10 @@ short_description: This is module to manage trafic control
 version_added: "2.6"
 
 description:
-    - "qdisc is short for 'queueing discipline' and it is elementary to understanding traffic control. Whenever the kernel needs to send a packet to an interface, it is enqueued to the qdisc configured for that interface."
+    - "qdisc is short for 'queueing discipline' and it is
+       elementary to understanding traffic control. Whenever
+       the kernel needs to send a packet to an interface, it
+       is enqueued to the qdisc configured for that interface."
 
 options:
     status:
@@ -50,18 +56,31 @@ message:
     returned: always
 '''
 
-from ansible.module_utils.basic import AnsibleModule
 
 def add_tc_qdisc(run_command, dev):
-    cmd_output = run_command(['/usr/sbin/tc', 'qdisc','add','dev'] + ''.join(list(dev)).split(' '))
+    cmd_output = run_command(
+            [
+                '/usr/sbin/tc',
+                'qdisc',
+                'add',
+                'dev'
+                ] + ''.join(list(dev)).split(' '))
     return cmd_output
+
 
 def remove_tc_qdisc(run_command, dev):
-    cmd_output = run_command(['/usr/sbin/tc', 'qdisc','del','dev'] + ''.join(list(dev)).split(' '))
+    cmd_output = run_command(
+            [
+                '/usr/sbin/tc',
+                'qdisc',
+                'del',
+                'dev'
+            ] + ''.join(list(dev)).split(' '))
     return cmd_output
 
+
 def get_tc_qdiscs(run_command):
-    cmd_output = run_command(['/usr/sbin/tc', 'qdisc','show'])[1]
+    cmd_output = run_command(['/usr/sbin/tc', 'qdisc', 'show'])[1]
     __qdiscs_list = []
     for line in cmd_output.splitlines():
         if not line:
@@ -71,30 +90,30 @@ def get_tc_qdiscs(run_command):
             "interface": __qdisc_list[4],
             "protocol": __qdisc_list[1]
             })
-    return __qdiscs_list 
+    return __qdiscs_list
+
 
 def qdics_exists(__interface, __protocol, __qdiscs):
     for __qdisc in __qdiscs:
-        if (
-                __qdisc['interface'] == __interface and 
-                __qdisc['protocol'] == __protocol
-            ):
+        if (__qdisc['interface'] == __interface and
+           __qdisc['protocol'] == __protocol):
             return True
-        
+
     return False
+
 
 def run_module():
     module_args = dict(
         status=dict(type='str', required=True),
         dev=dict(type='str', required=False)
     )
-    
+
     module = AnsibleModule(
         argument_spec=module_args,
     )
 
     run_command = module.run_command
-    
+
     result = dict(
         changed=False,
         message=''
@@ -104,30 +123,37 @@ def run_module():
 
     if len(module.params['dev'].split(' ')) < 3:
         module.fail_json(msg='You need to specify also protocol', **result)
-    
+
     __tc_qdisc_protocol = module.params['dev'].split(' ')[2]
     __tc_qdisc_interface = module.params['dev'].split(' ')[0]
     __tc_qdiscs = get_tc_qdiscs(run_command)
-
+    message = ""
     if module.params['status'] == 'present':
-        if not qdics_exists(__tc_qdisc_interface, __tc_qdisc_protocol, __tc_qdiscs):
+        if (not qdics_exists(
+              __tc_qdisc_interface,
+              __tc_qdisc_protocol,
+              __tc_qdiscs)):
             __output = add_tc_qdisc(run_command, module.params['dev'])
-            result['message'] = 'qdisc added' if __output[0] == 0 else __output[1] == ''
+            message = 'qdisc added' if __output[0] == 0 else __output[1]
             if __output[0] > 0:
                 module.fail_json(msg=__output[2], **result)
             result['changed'] = True
         else:
-            result['message'] = 'qdisc is present'
-   
+            message = 'qdisc is present'
+
     if module.params['status'] == 'absent':
-        if qdics_exists(__tc_qdisc_interface, __tc_qdisc_protocol, __tc_qdiscs):
+        if qdics_exists(
+                __tc_qdisc_interface,
+                __tc_qdisc_protocol,
+                __tc_qdiscs):
             __output = remove_tc_qdisc(run_command, module.params['dev'])
-            result['message'] = 'qdisc deleted' if __output[0] == 0 else __output[1] == ''
+            message = 'qdisc deleted' if __output[0] == 0 else __output[1]
             if __output[0] > 0:
                 module.fail_json(msg=__output[2], **result)
             result['changed'] = True
         else:
-            result["message"] = 'qdisc is absent'
+            message = 'qdisc is absent'
+    result['message'] = message
     module.exit_json(**result)
 
 
