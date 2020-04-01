@@ -25,6 +25,12 @@ tc_qdisc_inf_if: "enp0s3 root netem delay 200ms"
     vars:
       tc_qdisc_status: present
       tc_qdisc_inf_if: "enp0s3 root netem delay 200ms"
+  - name: Demonstrate tc qdisc absent
+    import_role:
+      name: tc_qdisc
+    vars:
+      tc_qdisc_status: absent
+      tc_qdisc_inf_if: "enp0s3 root netem delay 200ms"
 ```
 
 ## License
@@ -32,7 +38,5 @@ tc_qdisc_inf_if: "enp0s3 root netem delay 200ms"
 MIT.
 
 ## Author Information
-
-2 hours POC for tc qdisc add/del command.
 
 Jaroslav Fedor <fedorjaro@gmail.com>
