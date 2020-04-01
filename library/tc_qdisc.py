@@ -44,11 +44,6 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-original_message:
-    description: The requests parameters for tc qdisc command
-    type: str
-    returned: always
-
 message:
     description: The output message that the module generates
     type: str
@@ -102,13 +97,13 @@ def run_module():
     
     result = dict(
         changed=False,
-        original_message='',
         message=''
     )
-
+    if len(module.params['dev'].split(' ')) < 3:
+        module.fail_json(msg='You need to specify also protocol', **result)
+    
     __tc_qdisc_protocol = module.params['dev'].split(' ')[2]
     __tc_qdisc_interface = module.params['dev'].split(' ')[0]
-    result['original_message'] = module.params['dev']
     __tc_qdiscs = get_tc_qdiscs(run_command)
 
     if module.params['status'] == 'present':
