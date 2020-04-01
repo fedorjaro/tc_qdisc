@@ -1,7 +1,6 @@
 # TC_QDISC
 
-A template for an ansible role which configures some GNU/Linux subsystem or
-service. A brief description of the role goes here.
+qdisc is short for 'queueing discipline' and it is elementary to understanding tr    affic control. Whenever the kernel needs to send a packet to an interface, it is enqueue    d to the qdisc configured for that interface.
 
 ## Role Variables
 
@@ -30,7 +29,7 @@ tc_qdisc_inf_if: "enp0s3 root netem delay 200ms"
 
 ## License
 
-Whenever possible, please prefer MIT.
+MIT.
 
 ## Author Information
 
