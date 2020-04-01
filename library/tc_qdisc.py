@@ -99,6 +99,9 @@ def run_module():
         changed=False,
         message=''
     )
+    if module.params['status'] not in ['present', 'absent']:
+        module.fail_json(msg='Status must be present or absent', **result)
+
     if len(module.params['dev'].split(' ')) < 3:
         module.fail_json(msg='You need to specify also protocol', **result)
     
