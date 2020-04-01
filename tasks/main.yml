@@ -1,0 +1,6 @@
+---
+- name: Adjusting tc qdisc configuration
+  tc_qdisc:
+    status: "{{ tc_qdisc_status }}"
+    dev: "{{ tc_qdisc_inf_if }}"
+  become: true
