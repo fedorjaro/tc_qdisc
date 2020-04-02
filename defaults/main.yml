@@ -5,4 +5,4 @@
 
 # Examples of role input variables:
 tc_qdisc_status: absent
-ex_qdisc_inf_if: "dummy pams"
+tc_qdisc_inf_if: "dummy pams prot"
